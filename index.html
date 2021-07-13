@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en" ng-app="xlreleaseStartup" ng-jq="jQuery" ng-controller="MainController">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="maximum-scale=1.0">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="static/10.0.0/bootstrap.css" type="text/css">
+    <link rel="stylesheet" href="static/10.0.0/library.shared.css" type="text/css">
+    <link rel="stylesheet" href="static/10.0.0/library.css" type="text/css">
+    <link rel="stylesheet" href="static/10.0.0/xlrelease.css" type="text/css">
+    <link rel="stylesheet" href="ui-extensions/xlrelease-plugins.css" type="text/css">
+    <link rel="icon" type="image/x-icon" href="static/10.0.0/styles/img/favicon.ico"/>
+    <title ng-bind="getPageTitle()">Digital.ai Release</title>
+    <script>
+        // Include this file in the head of your main layout.
+
+        window.MYAPP = window.MYAPP || {};
+
+        window.MYAPP.waitForAngular = function() {
+
+            window.MYAPP.APP_READY = false;
+
+            function done(err) {
+                if (err) {
+                    return;
+                }
+                window.MYAPP.APP_READY = true;
+            }
+
+            var el = document.querySelector('html');
+
+            try {
+                if (!window.angular) {
+                    throw new Error('Angular could not be found on the window');
+                }
+                if (angular.getTestability) {
+                    angular.getTestability(el).whenStable(done);
+                } else {
+                    if (!angular.element(el).injector()) {
+                        throw new Error('Root element (html) has no injector. This may mean it is not inside ng-app.');
+                    }
+                    angular.element(el).injector().get('$browser').notifyWhenNoOutstandingRequests(done);
+                }
+            } catch (err) {
+                done(err.message);
+            }
+        };
+
+    </script>
+</head>
+
+<body handle-first-tab="{{security.isAuthenticated()}}">
+
+
+<!--[if lt IE 10]>
+<div class="no-ie8">
+    Digital.ai Release requires
+    <a href="https://docs.xebialabs.com/xl-release/concept/requirements-for-installing-xl-release.html#client-requirements" target="_blank" rel="noopener">
+        Internet Explorer 11 or higher, Firefox or Chrome
+    </a>. Please use a supported browser to access Digital.ai Release.
+</div>
+<![endif]-->
+<!--[if (gte IE 10) | (!IE)]><!-->
+
+<div class="main-header-wrapper ng-cloak" ng-style="{'border-bottom-color': theme.headerAccentColor}">
+    <div class="main-header">
+        <div id="logo-container" class="pull-left">
+            <a class="logo-link" href="#/">
+                <img alt="Releases page - Digital.ai Release" ng-src="{{productLogoSrc}}" class="logo" />
+                <img alt="" aria-hidden="true" src="static/10.0.0/styles/img/logo_digital_ai_license.svg" class="logo-print"/>
+            </a>
+        </div>
+        <div id="custom-logo-container" class="pull-left">
+            <img aria-hidden="true" ng-if="customLogoSrc" ng-src="{{customLogoSrc}}" onerror="this.onerror=null;this.style.display='none'" onload="this.style.display='block'" class="custom-logo" alt=""/>
+        </div>
+        <div class="pull-left ajax-loader-container">
+            <img alt="" aria-hidden="true" src="static/10.0.0/styles/img/white-ajax-loader.gif" id="loading"/>
+        </div>
+        <div class="pull-left">
+            <navigation-menu aria-label="Main navigation" id="main-menu" ng-if="!isFullPage()" items="mainMenuItems" level="0" role="navigation"></navigation-menu>
+        </div>
+        <div class="current-user pull-right" ng-if="security.isAuthenticated()">
+            <span>
+                <span class="lightText">Logged in as</span>
+                <span class="username">{{security.getUsername()}}</span>
+            </span>
+            <a tabindex="0" class="dropdown-button actions"
+               uib-popover-template="'partials/menu/help.html'"
+               popover-placement="bottom-right"
+               popover-trigger="'focus'"
+               aria-label="Help links"
+               aria-haspopup="list">
+                <i class="xl-icon help-icon icon-l"></i>
+            </a>
+            <a tabindex="1" class="dropdown-button actions settings"
+               uib-popover-template="'partials/menu/settings.html'"
+               popover-placement="bottom-right"
+               popover-trigger="'focus'"
+               aria-label="Settings"
+               aria-haspopup="list">
+                <i class="xl-icon settings-icon icon-l"></i>
+            </a>
+        </div>
+        <!-- only used in e2e tests -->
+        <a alt="" aria-hidden="true" id="logout" class="hide" ng-href="#/login">Logout</a>
+        <span alt="" aria-hidden="true" id="clear-client-settings" class="hide" ng-click="clearClientSettings()"></span>
+    </div>
+</div>
+<div id="splash-screen" ng-if="false">
+    <div class="loading"><img src="static/10.0.0/styles/img/big-ajax-loader.gif" alt="Loading Digital.ai Release"/>
+        <p>Loading Digital.ai Release</p></div>
+</div>
+
+<div id="modal" class="modal" tabindex="-1"></div>
+<div id="resizable-modal" class="modal" tabindex="-1"></div>
+
+<div class="view-container ng-cloak" view-container>
+    <div ng-include="'partials/menu/sub-header.html'" header-container></div>
+    <div ng-class="{
+            'full-page': isFullPage(),
+            'release-flow': isReleaseFlowPage() || isTemplateReleaseFlowPage(),
+            'roles': isRolePage(),
+            'timeline-page': isTimelinePage(),
+            'reports-dashboard': isDashboardsPages() || isReportsPages() || isDefinitionPage()
+        }"
+         ui-view class="view ng-cloak view-content"></div>
+</div>
+
+
+<div downloader></div>
+<div class="about action" modal="'partials/server-error/version-changed.html'" open-on="xlreleaseVersionChanged" on-modal-hide="refreshPage()"></div>
+
+<script src="static/10.0.0/jquery.js"></script>
+<script src="static/10.0.0/jquery-ui.js"></script>
+<script src="static/10.0.0/angular.js"></script>
+<script src="static/10.0.0/bootstrap.js"></script>
+<script src="static/10.0.0/react.js"></script>
+<script src="static/10.0.0/react-dom.js"></script>
+
+<script src="static/10.0.0/runtime.js"></script>
+<script src="static/10.0.0/library.shared.js"></script>
+<script src="static/10.0.0/library.js"></script>
+
+<script src="static/10.0.0/locale.js"></script>
+
+<script src="ui-extensions/xlrelease-module.js"></script>
+
+<script src="static/10.0.0/xlrelease.js"></script>
+<script src="ui-extensions/xlrelease-plugins.js"></script>
+
+
+<script src="static/10.0.0/partials.js"></script>
+
+<div hidden>
+    <span id="new-tab">Opens in a new tab</span>
+</div>
+
+</body>
+</html>
